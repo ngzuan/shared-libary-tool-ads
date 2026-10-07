@@ -1,5 +1,5 @@
 package com.toolads
 
-class ChanegDetector{
+class ChanegDetector implements Serializable {
     
 }

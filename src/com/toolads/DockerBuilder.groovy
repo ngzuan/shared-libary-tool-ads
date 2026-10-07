@@ -11,15 +11,12 @@ class DockerBuilder implements Serializable {
         def image = "${cfg.registryHost}/${cfg.registryProject}/${serviceName}:${tag}"
         def cacheRepo = "${cfg.registryHost}/${cfg.registryProject}/cache/${serviceName}"
 
-        steps.withCredentials([steps.usernamePassword(
-            credentialsId: cfg.registryCredId,
-            usernameVariable: 'REGISTRY_USER',
-            passwordVariable: 'REGISTRY_PASS',
-        )]) {
-            steps.sh """
-                echo "${REGISTRY_PASS}" | docker login ${cfg.registryHost} -u "${REGISTRY_USER}" --password-stdin
-            """
+        docker.withRegistry("${cfg.registryHost}", "${cfg.registryCredId}") {
+            steps.echo "Pushing ${image}"
+            def builtImage = docker.build("${image}")
+            builtImage.push()
         }
+
         steps.env."IMAGE_TAG_${serviceName.replace('-', '_').toUpperCase()}" = tag
         steps.echo "Pushed ${image}"
     }
